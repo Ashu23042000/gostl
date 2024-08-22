@@ -2,81 +2,73 @@ package linkedlist
 
 import "fmt"
 
-// custom datatype
-type DataType interface {
-	~int | ~string | ~float64
+// custom dataType
+type dataType interface {
+	// ~int | ~string | ~float64
 }
 
 // node struct
-type Node[T DataType] struct {
-	Data T
-	Next *Node[T]
+type node[T dataType] struct {
+	data T
+	next *node[T]
 }
 
 // list struct
-type List[T DataType] struct {
-	Head   *Node[T]
-	Tail   *Node[T]
-	Length int
+type List[T dataType] struct {
+	head   *node[T]
+	tail   *node[T]
+	length int
 }
 
 // create new list
-func New[T DataType](data T) *List[T] {
+func New[T dataType]() *List[T] {
 	return &List[T]{}
 }
 
 // create new node
-func newNode[T DataType](data T) *Node[T] {
-	return &Node[T]{}
+func newnode[T dataType](data T) *node[T] {
+	return &node[T]{data: data}
 }
 
 // insert at begening of list
 func (l *List[T]) InsertAtHead(data T) {
-	if l.Head != nil {
-		temp := l.Head
-		l.Head = newNode[T](data)
-		l.Head.Next = temp
-		l.Length++
+	if l.head != nil {
+		temp := l.head
+		l.head = newnode[T](data)
+		l.head.next = temp
+		l.length++
 		return
 	}
 
-	l.Head = newNode[T](data)
-	l.Tail = l.Head
-	l.Length++
-
+	l.head = newnode[T](data)
+	l.tail = l.head
+	l.length++
 }
 
 // insert at end of list
 func (l *List[T]) InsertAtTail(data T) {
-	l.Tail.Next = newNode[T](data)
-	l.Tail = l.Tail.Next
-	l.Length++
 
+	if l.head == nil {
+		l.InsertAtHead(data)
+		return
+	}
+
+	l.tail.next = newnode[T](data)
+	l.tail = l.tail.next
+	l.length++
 }
 
 // print data of each node from list
 func (l *List[T]) Print() {
-	temp := l.Head
+	temp := l.head
 
 	for temp != nil {
-		fmt.Printf("%v ", temp.Data)
-		temp = temp.Next
+		fmt.Printf("%v -> ", temp.data)
+		temp = temp.next
 	}
 
-	fmt.Println()
+	fmt.Println("nil")
 }
-
-// func (l *List[T]) Push(data T) {
-// 	if l.Head == nil {
-// 		l.InsertAtHead(data)
-// 		return
-// 	}
-
-// 	l.Tail.Next = newNode[T](data)
-// 	l.Tail = l.Tail.Next
-// 	l.Length++
-
-// }
 
 // insert new node at given position
 func (l *List[T]) InsertAtPosition(pos int, data T) {
@@ -85,62 +77,91 @@ func (l *List[T]) InsertAtPosition(pos int, data T) {
 		return
 	}
 
-	if pos > l.Length {
+	if pos > l.length {
 		fmt.Println("Invalid Position")
 		return
 	}
 
-	cnt := 0
-	temp := l.Head
+	cnt := 1
+	temp := l.head
 
-	for cnt != pos && cnt <= l.Length {
+	for cnt != pos && cnt <= l.length {
 		cnt++
-		temp = temp.Next
+		temp = temp.next
 	}
 
-	new := newNode[T](data)
-	new.Next = temp.Next
+	new := newnode[T](data)
+	new.next = temp.next
 
-	if temp.Next == nil {
-		temp.Next = new
-		l.Tail = temp.Next
+	if temp.next == nil {
+		temp.next = new
+		l.tail = temp.next
 	} else {
-		temp.Next = new
+		temp.next = new
 	}
 
-	l.Length++
-
+	l.length++
 }
 
 // delete node at given position
-func (l *List[T]) DeleteAtPosition(pos int, data T) {
+func (l *List[T]) DeleteAtPosition(pos int) {
+	if pos < 0 {
+		fmt.Println("Invalid Position, list start from 0th position")
+		return
+	}
+
+	if pos > l.length-1 {
+		fmt.Println("Invalid Position, list start from 0th position")
+		return
+	}
+
 	if pos == 0 {
-		fmt.Println("Invalid Position, Head is at position 1st")
+		l.DeleteHead()
 		return
 	}
 
-	if pos > l.Length {
-		fmt.Println("Invalid Position")
+	if pos == l.length-1 {
+		l.DeleteTail()
 		return
 	}
 
-	cnt := 0
-	temp := l.Head
+	cnt := 1
+	temp := l.head.next
+	prvs := l.head
 
-	var prvs *Node[T]
-
-	for cnt != pos && cnt <= l.Length {
+	for cnt != pos && cnt < l.length {
 		cnt++
 		prvs = temp
-		temp = temp.Next
+		temp = temp.next
 	}
 
-	if temp.Next != nil {
-		prvs = temp
-		prvs.Next = temp.Next
-	} else {
-		l.Tail = prvs
-	}
+	prvs.next = temp.next
+	l.length--
+}
 
-	l.Length--
+// delete head node
+func (l *List[T]) DeleteHead() {
+	if l.head == nil {
+		return
+	}
+	l.head = l.head.next
+}
+
+// delete tail node
+func (l *List[T]) DeleteTail() {
+	if l.head == nil {
+		return
+	}
+	temp := l.head
+	var prev *node[T]
+	for temp.next != nil {
+		prev = temp
+		temp = temp.next
+	}
+	prev.next = nil
+}
+
+// returns length of linked list
+func (l *List[T]) Length() int {
+	return l.length
 }
