@@ -1,3 +1,3 @@
-module github.com/Ashu23042000/gostl
+module github.com/sagargaikwad0/gostl
 
-go 1.18
+go 1.22.4
